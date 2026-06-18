@@ -27,6 +27,7 @@ const DOM = {
     refreshIcon: document.getElementById('refreshIcon'),
     syncStatus: document.getElementById('syncStatus'),
     exportCsvBtn: document.getElementById('exportCsvBtn'),
+    themeCheckbox: document.getElementById('themeCheckbox'),
     searchInput: document.getElementById('searchInput'),
     clearSearchBtn: document.getElementById('clearSearchBtn'),
     filterGroup: document.getElementById('filterGroup'),
@@ -51,11 +52,15 @@ const DOM = {
 // INITIALIZATION & EVENT LISTENERS
 // ==========================================================================
 document.addEventListener('DOMContentLoaded', () => {
+    initTheme();
     fetchReleaseNotes();
     setupEventListeners();
 });
 
 function setupEventListeners() {
+    // Theme Switch Toggle
+    DOM.themeCheckbox.addEventListener('change', toggleTheme);
+
     // Refresh & Utility buttons
     DOM.refreshBtn.addEventListener('click', fetchReleaseNotes);
     DOM.retryBtn.addEventListener('click', fetchReleaseNotes);
@@ -509,4 +514,30 @@ function exportToCSV() {
     document.body.removeChild(link);
     
     showToast('CSV export downloaded successfully!', 'success');
+}
+
+// ==========================================================================
+// THEME SWITCH LOGIC
+// ==========================================================================
+function initTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    if (savedTheme === 'light') {
+        document.body.classList.add('light-theme');
+        DOM.themeCheckbox.checked = true;
+    } else {
+        document.body.classList.remove('light-theme');
+        DOM.themeCheckbox.checked = false;
+    }
+}
+
+function toggleTheme(e) {
+    if (e.target.checked) {
+        document.body.classList.add('light-theme');
+        localStorage.setItem('theme', 'light');
+        showToast('Switched to Light Theme.', 'info');
+    } else {
+        document.body.classList.remove('light-theme');
+        localStorage.setItem('theme', 'dark');
+        showToast('Switched to Dark Theme.', 'info');
+    }
 }

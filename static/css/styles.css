@@ -21,6 +21,10 @@
     --text-secondary: #9ca3af;
     --text-muted: #6b7280;
 
+    --bg-code: rgba(255, 255, 255, 0.05);
+    --bg-pre: rgba(0, 0, 0, 0.2);
+    --text-code: #e289f2;
+
     /* Accent Colors */
     --accent-blue: #4285f4;
     --accent-blue-hover: #3367d6;
@@ -59,6 +63,31 @@
     --radius-md: 12px;
     --radius-lg: 20px;
     --radius-full: 9999px;
+}
+
+/* Light Mode Theme Overrides */
+body.light-theme {
+    --bg-app: #f5f7fa;
+    --bg-header: rgba(255, 255, 255, 0.85);
+    --bg-card: rgba(255, 255, 255, 0.7);
+    --bg-card-hover: rgba(255, 255, 255, 0.95);
+    --bg-input: #ffffff;
+    --bg-modal: #ffffff;
+    --bg-toast: #ffffff;
+
+    --border-color: rgba(0, 0, 0, 0.08);
+    --border-hover: rgba(66, 133, 244, 0.5);
+    
+    --text-primary: #1e293b;
+    --text-secondary: #475569;
+    --text-muted: #64748b;
+    
+    --bg-code: rgba(0, 0, 0, 0.05);
+    --bg-pre: rgba(0, 0, 0, 0.03);
+    --text-code: #a21caf;
+    
+    --shadow-md: 0 8px 20px rgba(0, 0, 0, 0.05);
+    --shadow-lg: 0 16px 36px rgba(0, 0, 0, 0.08);
 }
 
 /* ==========================================================================
@@ -526,17 +555,17 @@ a:hover {
 }
 
 .card-body code {
-    background-color: rgba(255, 255, 255, 0.05);
+    background-color: var(--bg-code);
     border: 1px solid var(--border-color);
     padding: 2px 6px;
     border-radius: var(--radius-sm);
     font-family: Consolas, Monaco, "Andale Mono", monospace;
     font-size: 13px;
-    color: #e289f2;
+    color: var(--text-code);
 }
 
 .card-body pre {
-    background-color: rgba(0, 0, 0, 0.2);
+    background-color: var(--bg-pre);
     border: 1px solid var(--border-color);
     padding: 12px;
     border-radius: var(--radius-md);
@@ -965,5 +994,82 @@ a:hover {
     border-color: var(--tag-feature-border) !important;
     background-color: var(--tag-feature-bg) !important;
     box-shadow: 0 0 8px rgba(52, 168, 83, 0.15);
+}
+
+/* ==========================================================================
+   THEME TOGGLER SWITCH
+   ========================================================================== */
+.theme-toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 14px;
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-color);
+}
+
+body.light-theme .theme-toggle-container {
+    background: rgba(0, 0, 0, 0.02);
+}
+
+.theme-toggle-icon {
+    font-size: 14px;
+    color: var(--text-muted);
+    transition: color var(--transition-fast);
+}
+
+body.light-theme .theme-toggle-icon.sun {
+    color: #fbbc04;
+}
+
+body:not(.light-theme) .theme-toggle-icon.moon {
+    color: #a2c4c9;
+}
+
+.theme-switch {
+    position: relative;
+    display: inline-block;
+    width: 38px;
+    height: 20px;
+}
+
+.theme-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.theme-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #374151;
+    transition: var(--transition-normal);
+    border-radius: var(--radius-full);
+}
+
+.theme-slider:before {
+    position: absolute;
+    content: "";
+    height: 14px;
+    width: 14px;
+    left: 3px;
+    bottom: 3px;
+    background-color: #f3f4f6;
+    transition: var(--transition-normal);
+    border-radius: 50%;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.theme-switch input:checked + .theme-slider {
+    background-color: var(--accent-blue);
+}
+
+.theme-switch input:checked + .theme-slider:before {
+    transform: translateX(18px);
 }
 
