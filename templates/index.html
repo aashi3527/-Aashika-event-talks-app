@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigQuery Release Notes Hub</title>
+    <!-- Google Fonts: Outfit & Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/static/css/styles.css">
+</head>
+<body>
+    <!-- App Container -->
+    <div class="app-container">
+        
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-main">
+                <div class="brand">
+                    <div class="logo-icon">
+                        <i class="fa-solid fa-database"></i>
+                        <span class="pulse-ring"></span>
+                    </div>
+                    <div>
+                        <h1>BigQuery Release Notes</h1>
+                        <p class="subtitle">Stay up-to-date with the latest Google Cloud BigQuery updates</p>
+                    </div>
+                </div>
+                
+                <div class="header-actions">
+                    <div class="sync-status" id="syncStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Checking for updates...</span>
+                    </div>
+                    <button class="btn btn-primary btn-refresh" id="refreshBtn" title="Refresh Release Notes">
+                        <i class="fa-solid fa-arrows-rotate" id="refreshIcon"></i>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter and Search Toolbar -->
+            <div class="toolbar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                    <input type="text" id="searchInput" placeholder="Search updates (e.g. sql, gemini, tables)..." autocomplete="off">
+                    <button class="clear-search-btn" id="clearSearchBtn" style="display: none;">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                
+                <div class="filter-group" id="filterGroup">
+                    <button class="filter-pill active" data-type="all">All</button>
+                    <button class="filter-pill" data-type="Feature">Features</button>
+                    <button class="filter-pill" data-type="Announcement">Announcements</button>
+                    <button class="filter-pill" data-type="Issue">Issues</button>
+                    <button class="filter-pill" data-type="Deprecation">Deprecations</button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content Area -->
+        <main class="app-content">
+            <!-- Loading Skeleton Screen -->
+            <div class="loading-container" id="loadingContainer">
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+                <div class="skeleton-card"></div>
+            </div>
+
+            <!-- Error State -->
+            <div class="error-container" id="errorContainer" style="display: none;">
+                <div class="error-card">
+                    <div class="error-icon">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <h2>Failed to load release notes</h2>
+                    <p id="errorMessage">Unable to fetch feed from Google Cloud. Please try again later.</p>
+                    <button class="btn btn-secondary" id="retryBtn">
+                        <i class="fa-solid fa-arrows-rotate"></i> Retry
+                    </button>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-container" id="emptyContainer" style="display: none;">
+                <div class="empty-card">
+                    <div class="empty-icon">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </div>
+                    <h2>No updates found</h2>
+                    <p>Try adjusting your filters or search keywords.</p>
+                </div>
+            </div>
+
+            <!-- Cards Grid -->
+            <div class="cards-grid" id="cardsGrid">
+                <!-- Cards will be dynamically injected here -->
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer-bar">
+            <p>BigQuery Release Notes Viewer &copy; 2026 | Powered by Flask, Vanilla JS & CSS</p>
+        </footer>
+    </div>
+
+    <!-- Tweet Composer Modal -->
+    <div class="modal-overlay" id="tweetModal" style="display: none;">
+        <div class="modal-box">
+            <div class="modal-header">
+                <h2><i class="fa-brands fa-x-twitter"></i> Compose Tweet</h2>
+                <button class="modal-close-btn" id="closeModalBtn">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="preview-card-compact">
+                    <div class="preview-type-badge" id="modalBadge">Feature</div>
+                    <div class="preview-date" id="modalDate">June 17, 2026</div>
+                    <div class="preview-title" id="modalTitle">BigQuery updates...</div>
+                </div>
+
+                <div class="composer-field">
+                    <label for="tweetTextarea">What do you want to say?</label>
+                    <textarea id="tweetTextarea" rows="4" maxlength="280" placeholder="Write something about this update..."></textarea>
+                    
+                    <!-- Appended elements simulation (link and hashtags) -->
+                    <div class="composer-attachment">
+                        <div class="attachment-link">
+                            <i class="fa-solid fa-link"></i>
+                            <span id="tweetUrlText">https://docs.cloud.google.com/...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="composer-footer">
+                    <div class="char-counter">
+                        <span id="charCount">280</span> / 280 characters remaining
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-ghost" id="cancelTweetBtn">Cancel</button>
+                        <button class="btn btn-twitter" id="submitTweetBtn">
+                            <i class="fa-brands fa-x-twitter"></i> Post Tweet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Custom JavaScript -->
+    <script src="/static/js/app.js"></script>
+</body>
+</html>
