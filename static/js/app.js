@@ -26,6 +26,7 @@ const DOM = {
     refreshBtn: document.getElementById('refreshBtn'),
     refreshIcon: document.getElementById('refreshIcon'),
     syncStatus: document.getElementById('syncStatus'),
+    exportCsvBtn: document.getElementById('exportCsvBtn'),
     searchInput: document.getElementById('searchInput'),
     clearSearchBtn: document.getElementById('clearSearchBtn'),
     filterGroup: document.getElementById('filterGroup'),
@@ -55,9 +56,10 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function setupEventListeners() {
-    // Refresh buttons
+    // Refresh & Utility buttons
     DOM.refreshBtn.addEventListener('click', fetchReleaseNotes);
     DOM.retryBtn.addEventListener('click', fetchReleaseNotes);
+    DOM.exportCsvBtn.addEventListener('click', exportToCSV);
     
     // Search input
     DOM.searchInput.addEventListener('input', (e) => {
@@ -242,14 +244,23 @@ function createCardElement(update) {
                 <i class="fa-solid fa-arrow-up-right-from-square"></i>
                 <span>GCP Docs</span>
             </a>
-            <button class="btn btn-secondary btn-tweet" title="Share this update on X / Twitter">
-                <i class="fa-brands fa-x-twitter"></i>
-                <span>Tweet</span>
-            </button>
+            <div class="card-actions-group">
+                <button class="btn btn-secondary btn-copy" title="Copy update to clipboard">
+                    <i class="fa-regular fa-copy"></i>
+                    <span>Copy</span>
+                </button>
+                <button class="btn btn-secondary btn-tweet" title="Share this update on X / Twitter">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <span>Tweet</span>
+                </button>
+            </div>
         </div>
     `;
     
-    // Attach event listener to Tweet Button
+    // Attach event listeners to buttons
+    const copyBtn = card.querySelector('.btn-copy');
+    copyBtn.addEventListener('click', () => copyToClipboard(update, copyBtn));
+    
     const tweetBtn = card.querySelector('.btn-tweet');
     tweetBtn.addEventListener('click', () => openTweetModal(update));
     
@@ -416,4 +427,86 @@ function showToast(message, type = 'info') {
         toast.style.animation = 'toast-in 0.3s reverse forwards';
         setTimeout(() => toast.remove(), 300);
     }, 4000);
+}
+
+// ==========================================================================
+// UTILITY FUNCTIONS: COPY & CSV EXPORT
+// ==========================================================================
+async function copyToClipboard(update, btnElement) {
+    const plainText = stripHtml(update.content);
+    const textToCopy = `BigQuery Release Note (${update.date}) - ${update.type}\n\n${plainText}\n\nRead more: ${update.link}`;
+    
+    try {
+        await navigator.clipboard.writeText(textToCopy);
+        
+        // Success visual feedback on button
+        const icon = btnElement.querySelector('i');
+        const text = btnElement.querySelector('span');
+        
+        const originalIconClass = icon.className;
+        const originalText = text.textContent;
+        
+        icon.className = 'fa-solid fa-check';
+        text.textContent = 'Copied';
+        btnElement.classList.add('copy-success');
+        
+        showToast('Release note copied to clipboard!', 'success');
+        
+        setTimeout(() => {
+            icon.className = originalIconClass;
+            text.textContent = originalText;
+            btnElement.classList.remove('copy-success');
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        showToast('Failed to copy to clipboard.', 'error');
+    }
+}
+
+function exportToCSV() {
+    if (!filteredUpdates || filteredUpdates.length === 0) {
+        showToast('No data to export.', 'error');
+        return;
+    }
+    
+    const headers = ['ID', 'Date', 'Updated Timestamp', 'Type', 'Content', 'Link'];
+    
+    const rows = filteredUpdates.map(u => [
+        u.id,
+        u.date,
+        u.updated,
+        u.type,
+        stripHtml(u.content),
+        u.link
+    ]);
+    
+    const escapeCSV = (val) => {
+        if (val === null || val === undefined) return '';
+        let stringVal = val.toString();
+        stringVal = stringVal.replace(/"/g, '""');
+        if (/[",\n\r]/.test(stringVal)) {
+            stringVal = `"${stringVal}"`;
+        }
+        return stringVal;
+    };
+    
+    const csvContent = [
+        headers.map(escapeCSV).join(','),
+        ...rows.map(row => row.map(escapeCSV).join(','))
+    ].join('\r\n');
+    
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    
+    const link = document.createElement('a');
+    link.href = url;
+    
+    const timestamp = new Date().toISOString().slice(0, 10);
+    const filterName = activeFilter.toLowerCase();
+    link.setAttribute('download', `bigquery_release_notes_${filterName}_${timestamp}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    showToast('CSV export downloaded successfully!', 'success');
 }

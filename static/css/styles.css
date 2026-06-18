@@ -951,3 +951,19 @@ a:hover {
         margin: 16px;
     }
 }
+
+/* ==========================================================================
+   NEW UTILITY UTILS: ACTIONS & SUCCESS STATE
+   ========================================================================== */
+.card-actions-group {
+    display: flex;
+    gap: 8px;
+}
+
+.btn.copy-success {
+    color: var(--tag-feature-text) !important;
+    border-color: var(--tag-feature-border) !important;
+    background-color: var(--tag-feature-bg) !important;
+    box-shadow: 0 0 8px rgba(52, 168, 83, 0.15);
+}
+
